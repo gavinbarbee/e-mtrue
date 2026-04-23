@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="space-y-6">
+    <div class="spacex-card verdict-hero rounded-2xl p-7 md:p-8">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-slate-400">Overall Physics Verdict</p>
+          <h2 class="text-3xl md:text-4xl font-semibold text-mist mt-2">{{ verdict.title }}</h2>
+          <p class="text-slate-300 mt-3 max-w-3xl leading-relaxed">{{ verdict.explanation }}</p>
+        </div>
+        <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border verdict-badge {{ verdict.badge_class }}">
+          <span class="h-3 w-3 rounded-full {{ verdict.dot_class }}"></span>
+          <span class="text-base font-semibold tracking-wide">{{ verdict.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="spacex-card rounded-2xl p-6">
+        <h2 class="text-xl font-semibold mb-4">Core First-Principles Results</h2>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">CP Location</p>
+            <p class="text-2xl font-semibold">{{ "%.3f"|format(analysis.stability.x_cp_m) }} m</p>
+          </div>
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Initial Stability Margin</p>
+            <p class="text-2xl font-semibold">{{ "%.2f"|format(analysis.stability.margin_initial_calibers) }} cal</p>
+          </div>
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Apogee</p>
+            <p class="text-2xl font-semibold">{{ "%.1f"|format(analysis.trajectory.apogee_m) }} m</p>
+          </div>
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Max Velocity</p>
+            <p class="text-2xl font-semibold">{{ "%.1f"|format(analysis.trajectory.max_velocity_m_s) }} m/s</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="spacex-card rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-3">Simulator vs Physics Truth</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm rounded-lg overflow-hidden">
+            <thead>
+              <tr class="text-slate-300 border-b border-slate-700 bg-slate-900/70">
+                <th class="text-left py-2 pr-4">Metric</th>
+                <th class="text-left py-2 pr-4">Physics</th>
+                <th class="text-left py-2 pr-4">Simulator</th>
+                <th class="text-left py-2 pr-4">Mismatch</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% set rows = [
+                ("Apogee (m)", comparisons.apogee_m),
+                ("Max Velocity (m/s)", comparisons.max_velocity_m_s),
+                ("Stability Margin (cal)", comparisons.stability_calibers)
+              ] %}
+              {% for label, row in rows %}
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                  <td class="py-2 pr-4">{{ label }}</td>
+                  <td class="py-2 pr-4">{{ "%.3f"|format(row.physics) }}</td>
+                  <td class="py-2 pr-4">
+                    {% if row.simulator is not none %}
+                      {{ "%.3f"|format(row.simulator) }}
+                    {% else %}
+                      <span class="text-slate-500">N/A</span>
+                    {% endif %}
+                  </td>
+                  <td class="py-2 pr-4">
+                    {% if row.mismatch_pct is not none %}
+                      <span class="{% if row.mismatch_pct|abs > 10 %}text-red-300{% else %}text-emerald-300{% endif %}">
+                        {{ "%+.1f"|format(row.mismatch_pct) }}%
+                      </span>
+                    {% else %}
+                      <span class="text-slate-500">N/A</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="spacex-card rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-3">Energy Balance Sanity Check</h3>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Thrust Work</p>
+            <p>{{ "%.0f"|format(analysis.energy.thrust_work_j) }} J</p>
+          </div>
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Drag Dissipation</p>
+            <p>{{ "%.0f"|format(analysis.energy.drag_loss_j) }} J</p>
+          </div>
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Potential at Apogee</p>
+            <p>{{ "%.0f"|format(analysis.energy.potential_at_apogee_j) }} J</p>
+          </div>
+          <div class="stat-card rounded p-4">
+            <p class="text-slate-400">Residual</p>
+            <p class="{% if analysis.energy.residual_pct|abs > 20 %}text-red-300{% else %}text-emerald-300{% endif %}">
+              {{ "%.0f"|format(analysis.energy.residual_j) }} J ({{ "%+.1f"|format(analysis.energy.residual_pct) }}%)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="spacex-card rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-3">Physics-Based Fix Suggestions</h3>
+        <ul class="list-disc list-inside text-slate-200 space-y-2">
+          {% for suggestion in suggestions %}
+            <li>{{ suggestion }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="spacex-card rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-3">Reference Equations (SymPy)</h3>
+        <p class="text-slate-300 text-sm mb-2"><span class="text-slate-400">Drag:</span> <code>{{ analysis.equations.drag_force }}</code></p>
+        <p class="text-slate-300 text-sm mb-2"><span class="text-slate-400">Acceleration:</span> <code>{{ analysis.equations.acceleration }}</code></p>
+        <p class="text-slate-300 text-sm"><span class="text-slate-400">Potential Energy:</span> <code>{{ analysis.equations.potential_energy }}</code></p>
+      </div>
+    </div>
+    </section>
+  </section>
+{% endblock %}

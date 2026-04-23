@@ -1,0 +1,12 @@
+services:
+  emtrue:
+    build:
+      context: .
+      target: runtime
+    image: emtrue:latest
+    container_name: emtrue
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+    restart: unless-stopped

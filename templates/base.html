@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Mtrue | First-Principles Rocket Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              graphite: "#0a0a0a",
+              panel: "#121316",
+              panelsoft: "#17191e",
+              accent: "#60748f",
+              mist: "#f1f3f7"
+            },
+            boxShadow: {
+              card: "0 18px 40px -28px rgba(0, 0, 0, 0.75)"
+            },
+            keyframes: {
+              fadeInUp: {
+                "0%": { opacity: "0", transform: "translateY(10px)" },
+                "100%": { opacity: "1", transform: "translateY(0px)" }
+              }
+            },
+            animation: {
+              fadeInUp: "fadeInUp 650ms ease-out"
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+  <body class="bg-graphite text-slate-100 min-h-screen relative">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(96,116,143,0.10),_transparent_62%)] pointer-events-none"></div>
+    <div class="relative max-w-6xl mx-auto px-6 py-8 fade-enter">
+      <header class="mb-8">
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <div class="space-y-1">
+            <h1 class="text-3xl font-semibold tracking-tight text-mist">E-Mtrue</h1>
+            <p class="text-slate-400">First-principles verification for rocket designs</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <a href="/" class="text-accent hover:text-slate-300 font-medium transition">New Analysis</a>
+            <div class="hidden md:grid place-items-center w-20 h-20 rounded-full rocket-frame">
+              <svg viewBox="0 0 120 120" class="rocket-svg w-14 h-14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Rocket motif">
+                <circle cx="60" cy="60" r="51" stroke="rgba(126,144,168,0.35)" />
+                <path d="M60 25C69 35 73 50 72 65L60 95L48 65C47 50 51 35 60 25Z" fill="rgba(226,232,240,0.95)" />
+                <path d="M54 66L44 78L48 61L54 66Z" fill="rgba(111,130,159,0.95)" />
+                <path d="M66 66L76 78L72 61L66 66Z" fill="rgba(111,130,159,0.95)" />
+                <circle cx="60" cy="50" r="6.5" fill="rgba(111,130,159,0.95)" />
+                <path d="M60 95L55 104L60 110L65 104L60 95Z" fill="rgba(181,191,205,0.85)" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <p class="mt-4 border-l-2 border-accent/70 pl-3 text-slate-300 italic">"{{ quote }}"</p>
+      </header>
+
+      <main class="fade-enter-delay">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

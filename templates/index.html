@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="spacex-card rounded-2xl p-6 md:p-7">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-2xl font-semibold text-mist">MVP Rocket Input</h2>
+        <p class="text-slate-400 mt-1">
+          Minimal required fields only. E-Mtrue auto-fills geometry defaults for fast verification.
+        </p>
+      </div>
+      <div class="rounded-lg border border-accent/30 bg-panelsoft/80 px-3 py-2 text-xs text-slate-300">
+        Default profile: 4 fins, Cd 0.55, launch 90 deg
+      </div>
+    </div>
+
+    {% if errors %}
+      <div class="mb-6 bg-rose-950/40 border border-rose-700/60 rounded-lg p-4">
+        <p class="font-semibold text-rose-200 mb-2">Please fix the following:</p>
+        <ul class="list-disc list-inside text-rose-100">
+          {% for error in errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form action="/calculate" method="post" class="space-y-7">
+      <div>
+        <h3 class="text-base font-semibold text-accent mb-3 uppercase tracking-wide">Essential Inputs</h3>
+        <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <label class="block">
+            <span class="text-sm text-slate-300">Body length (m)</span>
+            <input type="number" step="any" min="0.0001" name="body_length_m" value="{{ form_data.get('body_length_m', '') }}" required class="mt-1 w-full rounded bg-panelsoft border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Body diameter (m)</span>
+            <input type="number" step="any" min="0.0001" name="body_diameter_m" value="{{ form_data.get('body_diameter_m', '') }}" required class="mt-1 w-full rounded bg-panelsoft border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Dry mass (kg)</span>
+            <input type="number" step="any" min="0.0001" name="dry_mass_kg" value="{{ form_data.get('dry_mass_kg', '') }}" required class="mt-1 w-full rounded bg-panelsoft border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Propellant mass (kg)</span>
+            <input type="number" step="any" min="0.0001" name="propellant_mass_kg" value="{{ form_data.get('propellant_mass_kg', '') }}" required class="mt-1 w-full rounded bg-panelsoft border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Average motor thrust (N)</span>
+            <input type="number" step="any" min="0.0001" name="motor_avg_thrust_n" value="{{ form_data.get('motor_avg_thrust_n', '') }}" required class="mt-1 w-full rounded bg-panelsoft border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Burn time (s)</span>
+            <input type="number" step="any" min="0.0001" name="burn_time_s" value="{{ form_data.get('burn_time_s', '') }}" required class="mt-1 w-full rounded bg-panelsoft border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+        </div>
+      </div>
+
+      <details class="spacex-subpanel rounded-xl p-4">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-300">
+          Advanced Geometry & Environment (optional overrides)
+        </summary>
+        <p class="text-xs text-slate-500 mt-2 mb-4">
+          Leave blank to use smart defaults derived from body dimensions.
+        </p>
+        <div class="grid md:grid-cols-3 gap-4">
+          <label class="block">
+            <span class="text-sm text-slate-300">Nose length (m)</span>
+            <input type="number" step="any" min="0.0001" name="nose_length_m" value="{{ form_data.get('nose_length_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Fin root chord (m)</span>
+            <input type="number" step="any" min="0.0001" name="fin_root_chord_m" value="{{ form_data.get('fin_root_chord_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Fin tip chord (m)</span>
+            <input type="number" step="any" min="0.0001" name="fin_tip_chord_m" value="{{ form_data.get('fin_tip_chord_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Fin span (m)</span>
+            <input type="number" step="any" min="0.0001" name="fin_span_m" value="{{ form_data.get('fin_span_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Fin sweep (m)</span>
+            <input type="number" step="any" min="0" name="fin_sweep_m" value="{{ form_data.get('fin_sweep_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Fin leading edge (m from nose)</span>
+            <input type="number" step="any" min="0" name="fin_leading_edge_from_nose_m" value="{{ form_data.get('fin_leading_edge_from_nose_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Fin count</span>
+            <input type="number" min="3" step="1" name="fin_count" value="{{ form_data.get('fin_count', '4') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Drag coefficient (Cd)</span>
+            <input type="number" step="any" min="0.0001" name="drag_coefficient" value="{{ form_data.get('drag_coefficient', '0.55') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Launch angle (deg)</span>
+            <input type="number" step="any" min="0.1" max="90" name="launch_angle_deg" value="{{ form_data.get('launch_angle_deg', '90') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Air density (kg/m^3)</span>
+            <input type="number" step="any" min="0.1" name="air_density_kg_m3" value="{{ form_data.get('air_density_kg_m3', '1.225') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0 transition" />
+          </label>
+        </div>
+      </details>
+
+      <details class="spacex-subpanel rounded-xl p-4">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-300">
+          Simulator Comparison Inputs (optional)
+        </summary>
+        <div class="grid md:grid-cols-3 gap-4 mt-4">
+          <label class="block">
+            <span class="text-sm text-slate-300">Simulator apogee (m)</span>
+            <input type="number" step="any" name="sim_apogee_m" value="{{ form_data.get('sim_apogee_m', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Simulator max velocity (m/s)</span>
+            <input type="number" step="any" name="sim_max_velocity_m_s" value="{{ form_data.get('sim_max_velocity_m_s', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-slate-300">Simulator stability margin (cal)</span>
+            <input type="number" step="any" name="sim_stability_calibers" value="{{ form_data.get('sim_stability_calibers', '') }}" class="mt-1 w-full rounded bg-panel border border-slate-700 p-2.5 focus:border-accent focus:ring-0" />
+          </label>
+        </div>
+      </details>
+
+      <button type="submit" class="w-full md:w-auto bg-slate-100 text-slate-950 font-semibold px-7 py-3 rounded-lg hover:bg-white transition shadow-card">
+        Run E-Mtrue Verification
+      </button>
+    </form>
+  </section>
+{% endblock %}
